@@ -363,6 +363,7 @@ list(APPEND SOURCE_FILES
         FreeRTOS/heap_4_infinitime.c
         BootloaderVersion.cpp
         logging/NrfLogger.cpp
+        dislayapp/screens/REM.cpp
         displayapp/DisplayApp.cpp
         displayapp/screens/Screen.cpp
         displayapp/screens/Tile.cpp
