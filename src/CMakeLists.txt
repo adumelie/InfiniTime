@@ -363,7 +363,6 @@ list(APPEND SOURCE_FILES
         FreeRTOS/heap_4_infinitime.c
         BootloaderVersion.cpp
         logging/NrfLogger.cpp
-        dislayapp/screens/REM.cpp
         displayapp/DisplayApp.cpp
         displayapp/screens/Screen.cpp
         displayapp/screens/Tile.cpp
@@ -398,6 +397,7 @@ list(APPEND SOURCE_FILES
         displayapp/screens/Alarm.cpp
         displayapp/screens/Styles.cpp
         displayapp/screens/WeatherSymbols.cpp
+        displayapp/screens/REM.cpp
         displayapp/Colors.cpp
         displayapp/widgets/Counter.cpp
         displayapp/widgets/PageIndicator.cpp
