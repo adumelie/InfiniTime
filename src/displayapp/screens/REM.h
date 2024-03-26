@@ -11,14 +11,21 @@ namespace Pinetime {
         namespace Screens {
             class REM : public Screen {
             public:
-                REM();
+                REM(Controllers::MotorController& motorController);
                 ~REM() override;
 
                 static void btnEventHandler(lv_obj_t* obj, lv_event_t event);
-                void OnButtonEvent(lv_obj_t* obj, lv_event_t event);
+                void OnButtonEvent(lv_event_t event);
+                void startDelayToSequence();
+
 
             private:
-                Pinetime::Controllers::MotorController motorController;
+                Pinetime::Controllers::MotorController& motorController;
+                static void periodicVibrationSequence(TimerHandle_t xTimer);
+                void vibrationSequence();
+
+                TimerHandle_t delayTimerHandle;
+
             };
         }
 
@@ -27,7 +34,7 @@ namespace Pinetime {
             static constexpr Apps app = Apps::REM;
             static constexpr const char* icon = Screens::Symbols::eye;
             static Screens::Screen* Create(AppControllers& controllers) {
-                return new Screens::REM();
+                return new Screens::REM(controllers.motorController);
             }
         };
     }

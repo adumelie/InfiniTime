@@ -11,6 +11,7 @@ void MotorController::Init() {
 
   shortVib = xTimerCreate("shortVib", 1, pdFALSE, nullptr, StopMotor);
   longVib = xTimerCreate("longVib", pdMS_TO_TICKS(1000), pdTRUE, this, Ring);
+  pulseTimerEnd = xTimerCreate("pulseTimer", pdMS_TO_TICKS(5000), pdFALSE, this, StopPulse);
 }
 
 void MotorController::Ring(TimerHandle_t xTimer) {
@@ -32,6 +33,16 @@ void MotorController::StartRinging() {
 void MotorController::StopRinging() {
   xTimerStop(longVib, 0);
   nrf_gpio_pin_set(PinMap::Motor);
+}
+
+void MotorController::pulse() {
+    xTimerStart(longVib, 0);        // Start the pulse, 1 pulse per second
+    xTimerStart(pulseTimerEnd, 0); // Stop the pulse after 5 seconds
+}
+
+void MotorController::StopPulse(TimerHandle_t xTimer) {
+    auto* motorController = static_cast<MotorController*>(pvTimerGetTimerID(xTimer));
+    motorController->StopRinging();
 }
 
 void MotorController::StopMotor(TimerHandle_t /*xTimer*/) {

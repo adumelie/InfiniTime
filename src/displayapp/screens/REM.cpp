@@ -1,15 +1,17 @@
 #include "displayapp/screens/REM.h"
-#include "displayapp/DisplayApp.h"
 #include "components/motor/MotorController.h"
 
 using namespace Pinetime::Applications::Screens;
 
 void REM::btnEventHandler(lv_obj_t* obj, lv_event_t event) {
     auto* screen = static_cast<REM*>(obj->user_data);
-    screen->OnButtonEvent(obj, event);
+    screen->OnButtonEvent(event);
 }
 
-REM::REM() {
+REM::REM(Controllers::MotorController& motorController):
+    motorController{motorController}
+{
+
     lv_obj_t* btn = lv_btn_create(lv_scr_act(), nullptr);
     lv_obj_set_size(btn, 100, 50);
     lv_obj_align(btn, nullptr, LV_ALIGN_CENTER, 0, 0);
@@ -27,13 +29,23 @@ REM::~REM() {
     motorController.StopRinging(); // Make sure to stop any ongoing vibrations
 }
 
-void REM::OnButtonEvent(lv_obj_t* obj, lv_event_t event) {
+void REM::OnButtonEvent(lv_event_t event) {
     if (event == LV_EVENT_CLICKED) {
-        for (int i = 0; i < 3; ++i) {
-            motorController.StartRinging();
-            vTaskDelay(pdMS_TO_TICKS(200)); // Delay for 200 milliseconds (adjust as needed)
-            motorController.StopRinging();
-            vTaskDelay(pdMS_TO_TICKS(300)); // Delay for 300 milliseconds between pulses (adjust as needed)
-        }
+        startDelayToSequence();
     }
+}
+
+void REM::startDelayToSequence() {
+    const int minutes = 0;
+    delayTimerHandle = xTimerCreate("DelayTimer", pdMS_TO_TICKS(minutes * 60 * 1000), pdFALSE, this, periodicVibrationSequence);
+    xTimerStart(delayTimerHandle, 0);
+}
+
+void REM::periodicVibrationSequence(TimerHandle_t xTimer) {
+    REM *remInstance = static_cast<REM *>(pvTimerGetTimerID(xTimer));
+    remInstance->vibrationSequence(); // Call a member function of REM instance
+}
+
+void REM::vibrationSequence(){
+    motorController.pulse();
 }
