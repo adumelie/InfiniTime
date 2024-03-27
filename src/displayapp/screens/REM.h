@@ -14,8 +14,10 @@ namespace Pinetime {
                 REM(Controllers::MotorController& motorController);
                 ~REM() override;
 
-                static void btnEventHandler(lv_obj_t* obj, lv_event_t event);
-                void OnButtonEvent(lv_event_t event);
+                static void btnEventHandler(lv_obj_t*, lv_event_t);
+                static void btnEventHandlerSTOP(lv_obj_t*, lv_event_t);
+                void OnButtonEvent(lv_event_t);
+                void OnButtonEventSTOP(lv_event_t);
                 void startDelayToSequence();
 
 
