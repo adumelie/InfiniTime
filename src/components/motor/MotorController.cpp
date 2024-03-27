@@ -40,6 +40,12 @@ void MotorController::pulse() {
     xTimerStart(pulseTimerEnd, 0); // Stop the pulse after 5 seconds
 }
 
+void MotorController::hapticFeedback() {
+    xTimerStart(longVib, 0); // Start the vibration
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    xTimerStop(longVib, 0); // Stop the vibration
+}
+
 void MotorController::StopPulse(TimerHandle_t xTimer) {
     auto* motorController = static_cast<MotorController*>(pvTimerGetTimerID(xTimer));
     motorController->StopRinging();

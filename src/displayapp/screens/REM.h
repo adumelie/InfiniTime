@@ -19,13 +19,15 @@ namespace Pinetime {
                 void startDelayToSequence();
 
 
+
             private:
                 Pinetime::Controllers::MotorController& motorController;
-                static void periodicVibrationSequence(TimerHandle_t xTimer);
-                void vibrationSequence();
+                static void periodicVibrationSequence(TimerHandle_t);
+                static void pulse(TimerHandle_t);
+
+                static void test(TimerHandle_t);
 
                 TimerHandle_t delayTimerHandle;
-
             };
         }
 

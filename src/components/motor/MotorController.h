@@ -16,6 +16,7 @@ namespace Pinetime {
       void StartRinging();
       void StopRinging();
       void pulse();
+      void hapticFeedback();
 
     private:
       static void Ring(TimerHandle_t xTimer);

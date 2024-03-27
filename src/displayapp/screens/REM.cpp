@@ -8,6 +8,11 @@ void REM::btnEventHandler(lv_obj_t* obj, lv_event_t event) {
     screen->OnButtonEvent(event);
 }
 
+void REM::test(TimerHandle_t xTimer) {
+    printf("Callback\n");
+    (void)xTimer;
+}
+
 REM::REM(Controllers::MotorController& motorController):
     motorController{motorController}
 {
@@ -22,6 +27,7 @@ REM::REM(Controllers::MotorController& motorController):
     lv_obj_set_user_data(btn, this); // Set REM instance as user data
     lv_obj_set_event_cb(btn, btnEventHandler);
     motorController.Init();
+
 }
 
 REM::~REM() {
@@ -36,16 +42,26 @@ void REM::OnButtonEvent(lv_event_t event) {
 }
 
 void REM::startDelayToSequence() {
-    const int minutes = 0;
-    delayTimerHandle = xTimerCreate("DelayTimer", pdMS_TO_TICKS(minutes * 60 * 1000), pdFALSE, this, periodicVibrationSequence);
+    motorController.hapticFeedback();
+    motorController.hapticFeedback();
+
+    delayTimerHandle = xTimerCreate("DelayTimer", pdMS_TO_TICKS(5 * 1000), pdFALSE, this, periodicVibrationSequence);
     xTimerStart(delayTimerHandle, 0);
 }
 
 void REM::periodicVibrationSequence(TimerHandle_t xTimer) {
+
     REM *remInstance = static_cast<REM *>(pvTimerGetTimerID(xTimer));
-    remInstance->vibrationSequence(); // Call a member function of REM instance
+    remInstance->motorController.hapticFeedback();
+    remInstance->motorController.hapticFeedback();
+
+    for (int i = 0; i < 4; ++i) {
+        remInstance->motorController.pulse();
+    }
+
 }
 
-void REM::vibrationSequence(){
-    motorController.pulse();
+void REM::pulse(TimerHandle_t xTimer) {
+    REM *remInstance = static_cast<REM *>(pvTimerGetTimerID(xTimer));
+    remInstance->motorController.pulse();
 }
