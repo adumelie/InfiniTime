@@ -69,9 +69,7 @@ void REM::startDelayToSequence() {
     motorController.hapticFeedback();
 
     // Timer REM heuristic (70 + 5 min SOP), repeat after 70 + 5 min also
-    // auto delay = pdMS_TO_TICKS(5 * 60 * 1000); // 5 min (uint32)
-
-    auto delay = pdMS_TO_TICKS( 60 * 1000); // TMP for testing 1 min
+    auto delay = pdMS_TO_TICKS(5 * 60 * 1000); // 5 min (uint32)
 
     delayTimerHandle = xTimerCreate("DelayTimer", delay, pdTRUE, this, periodicVibrationSequence);
     xTimerStart(delayTimerHandle, 0);
@@ -82,26 +80,26 @@ void REM::periodicVibrationSequence(TimerHandle_t xTimer) {
     REM *remInstance = static_cast<REM *>(pvTimerGetTimerID(xTimer));
 
     count++;
-    if (count >= 1) {  // 15 * 5 min = 75 min
+    if (count >= 15) {  // 15 * 5 min = 75 min
         count = 0;     // Reset for another 75 min
 
-        TimerHandle_t repeatPulseTimer = xTimerCreate("repeatPulseTimer", pdMS_TO_TICKS(2000), pdTRUE, remInstance, repeatPulse);
+        TimerHandle_t repeatPulseTimer = xTimerCreate("repeatPulseTimer", pdMS_TO_TICKS(10000), pdTRUE, remInstance, repeatPulse);
         xTimerStart(repeatPulseTimer, 0);
     }
 }
 
 void REM::repeatPulse(TimerHandle_t xTimer) {
     /*
-     * Repeat the pulse 5 times
+     * Repeat the pulse Y times
      * The function is called every X seconds by the timer
-     * and will stop after 5 times.
+     * and will stop after Y times.
      */
     static uint8_t count = 0;
     REM *remInstance = static_cast<REM *>(pvTimerGetTimerID(xTimer));
     remInstance->motorController.pulse();
 
     count++;
-    if (count >= 5) {
+    if (count >= 4) {
         xTimerStop(xTimer, 0);
         count = 0;
     }
