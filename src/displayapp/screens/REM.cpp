@@ -22,7 +22,7 @@ REM::REM(Controllers::MotorController& motorController):
     lv_obj_align(btn, nullptr, LV_ALIGN_CENTER, 0, 0);
 
     lv_obj_t* label = lv_label_create(btn, nullptr);
-    lv_label_set_text(label, "VRRR");
+    lv_label_set_text(label, "NRRR");
 
     lv_obj_set_user_data(btn, this); // Set REM instance as user data
     lv_obj_set_event_cb(btn, btnEventHandler);
@@ -41,8 +41,9 @@ REM::REM(Controllers::MotorController& motorController):
 }
 
 REM::~REM() {
-    lv_obj_clean(lv_scr_act());
     motorController.StopRinging(); // Make sure to stop any ongoing vibrations
+    xTimerDelete(delayTimerHandle, 0); // Make sure to stop timer
+    lv_obj_clean(lv_scr_act());
 }
 
 void REM::OnButtonEvent(lv_event_t event) {
@@ -67,23 +68,38 @@ void REM::startDelayToSequence() {
     motorController.hapticFeedback();
     motorController.hapticFeedback();
 
-    delayTimerHandle = xTimerCreate("DelayTimer", pdMS_TO_TICKS(5 * 1000), pdTRUE, this, periodicVibrationSequence);
+    // Timer REM heuristic (70 + 5 min), repeat after 70 + 5 min also
+    // auto delay = pdMS_TO_TICKS(5 * 60 * 1000); // 5 min (uint32)
+
+    auto delay = pdMS_TO_TICKS( 60 * 1000); // TMP
+
+    delayTimerHandle = xTimerCreate("DelayTimer", delay, pdTRUE, this, periodicVibrationSequence);
     xTimerStart(delayTimerHandle, 0);
 }
 
 void REM::periodicVibrationSequence(TimerHandle_t xTimer) {
-
+    static uint8_t count = 0; // Breaking 75 min into chunks that fit into uint32_t)
     REM *remInstance = static_cast<REM *>(pvTimerGetTimerID(xTimer));
-    remInstance->motorController.hapticFeedback();
-    remInstance->motorController.hapticFeedback();
 
-    for (int i = 0; i < 4; ++i) {
-        remInstance->motorController.pulse();
+    count++;
+    if (count >= 1) {  // 15 * 5 min = 75 min
+        count = 0; // Reset for another 75 min
+
+        // start timer for repeatPulse
+        TimerHandle_t repeatPulseTimer = xTimerCreate("repeatPulseTimer", pdMS_TO_TICKS(2000), pdTRUE, remInstance, repeatPulse);
+        xTimerStart(repeatPulseTimer, 0);
     }
-
 }
 
-void REM::pulse(TimerHandle_t xTimer) {
+// function that will be called by a timer for 5 times, after which it will stop the timer
+void REM::repeatPulse(TimerHandle_t xTimer) {
+    static uint8_t count = 0;
     REM *remInstance = static_cast<REM *>(pvTimerGetTimerID(xTimer));
     remInstance->motorController.pulse();
+
+    count++;
+    if (count >= 5) {
+        xTimerStop(xTimer, 0);
+        count = 0;
+    }
 }
