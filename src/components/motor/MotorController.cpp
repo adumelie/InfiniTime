@@ -38,7 +38,7 @@ void MotorController::StopRinging() {
 void MotorController::pulse() {
 //    xTimerStart(longVib, 0);        // Start the pulse, 1 pulse per second
 //    xTimerStart(pulseTimerEnd, 0); // Stop the pulse after 5 seconds
-    RunForDuration(pdMS_TO_TICKS(20));
+    RunForDuration(pdMS_TO_TICKS(25));
 }
 
 void MotorController::hapticFeedback() {

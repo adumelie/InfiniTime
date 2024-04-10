@@ -83,7 +83,7 @@ void REM::periodicVibrationSequence(TimerHandle_t xTimer) {
     if (count >= 15) {  // 15 * 5 min = 75 min
         count = 0;     // Reset for another 75 min
 
-        TimerHandle_t repeatPulseTimer = xTimerCreate("repeatPulseTimer", pdMS_TO_TICKS(10000), pdTRUE, remInstance, repeatPulse);
+        TimerHandle_t repeatPulseTimer = xTimerCreate("repeatPulseTimer", pdMS_TO_TICKS(60 * 1000), pdTRUE, remInstance, repeatPulse);
         xTimerStart(repeatPulseTimer, 0);
     }
 }
