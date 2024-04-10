@@ -83,7 +83,7 @@ void REM::periodicVibrationSequence(TimerHandle_t xTimer) {
     if (count >= 15) {  // 15 * 5 min = 75 min
         count = 0;     // Reset for another 75 min
 
-        TimerHandle_t repeatPulseTimer = xTimerCreate("repeatPulseTimer", pdMS_TO_TICKS(60 * 1000), pdTRUE, remInstance, repeatPulse);
+        TimerHandle_t repeatPulseTimer = xTimerCreate("repeatPulseTimer", pdMS_TO_TICKS(3 * 60 * 1000), pdTRUE, remInstance, repeatPulse);
         xTimerStart(repeatPulseTimer, 0);
     }
 }
@@ -96,10 +96,40 @@ void REM::repeatPulse(TimerHandle_t xTimer) {
      */
     static uint8_t count = 0;
     REM *remInstance = static_cast<REM *>(pvTimerGetTimerID(xTimer));
-    remInstance->motorController.pulse();
 
     count++;
     if (count >= 4) {
+        xTimerStop(xTimer, 0);
+        count = 0;
+
+        // Create a new timer that triggers every 30 seconds and calls pulseThreeTimes
+        TimerHandle_t pulseThreeTimesTimer = xTimerCreate("pulseThreeTimesTimer", pdMS_TO_TICKS(30 * 1000), pdTRUE, remInstance, pulseThreeTimes);
+        xTimerStart(pulseThreeTimesTimer, 0);
+    }
+}
+
+void REM::pulseThreeTimes(TimerHandle_t xTimer) {
+    static uint8_t count = 0;
+    REM *remInstance = static_cast<REM *>(pvTimerGetTimerID(xTimer));
+
+    count++;
+    if (count >= 1) {
+        xTimerStop(xTimer, 0);
+        count = 0;
+
+        // Create a new timer that triggers every 2 seconds and calls pulseAndStop
+        TimerHandle_t pulseAndStopTimer = xTimerCreate("pulseAndStopTimer", pdMS_TO_TICKS(1000), pdTRUE, remInstance, pulseAndStop);
+        xTimerStart(pulseAndStopTimer, 0);
+    }
+}
+
+void REM::pulseAndStop(TimerHandle_t xTimer) {
+    static uint8_t count = 0;
+    REM *remInstance = static_cast<REM *>(pvTimerGetTimerID(xTimer));
+    remInstance->motorController.pulse();
+
+    count++;
+    if (count >= 3) {
         xTimerStop(xTimer, 0);
         count = 0;
     }

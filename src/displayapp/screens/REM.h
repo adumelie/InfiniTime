@@ -26,6 +26,8 @@ namespace Pinetime {
                 Pinetime::Controllers::MotorController& motorController;
                 static void periodicVibrationSequence(TimerHandle_t);
                 static void repeatPulse(TimerHandle_t);
+                static void pulseThreeTimes(TimerHandle_t);
+                static void pulseAndStop(TimerHandle_t);
 
                 static void test(TimerHandle_t);
 
