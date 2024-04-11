@@ -8,11 +8,6 @@ void REM::btnEventHandler(lv_obj_t* obj, lv_event_t event) {
     screen->OnButtonEvent(event);
 }
 
-void REM::test(TimerHandle_t xTimer) {
-    printf("Callback\n");
-    (void)xTimer;
-}
-
 REM::REM(Controllers::MotorController& motorController):
     motorController{motorController}
 {
@@ -69,7 +64,10 @@ void REM::startDelayToSequence() {
     motorController.hapticFeedback();
 
     // Timer REM heuristic (70 + 5 min SOP), repeat after 70 + 5 min also
-    auto delay = pdMS_TO_TICKS(5 * 60 * 1000); // 5 min (uint32)
+    // auto delay = pdMS_TO_TICKS(5 * 60 * 1000); // 5 min (uint32)
+
+    // calculate delay in ticks manually, without using ms not pdMS_To_Ticks to avoid overflow, 75 min
+    auto delay = 75 * configTICK_RATE_HZ * 60;
 
     delayTimerHandle = xTimerCreate("DelayTimer", delay, pdTRUE, this, periodicVibrationSequence);
     xTimerStart(delayTimerHandle, 0);
@@ -80,7 +78,7 @@ void REM::periodicVibrationSequence(TimerHandle_t xTimer) {
     REM *remInstance = static_cast<REM *>(pvTimerGetTimerID(xTimer));
 
     count++;
-    if (count >= 15) {  // 15 * 5 min = 75 min
+    if (count >= 1) {  // 15 * 5 min = 75 min, or 1 * 75 = 75
         count = 0;     // Reset for another 75 min
 
         TimerHandle_t repeatPulseTimer = xTimerCreate("repeatPulseTimer", pdMS_TO_TICKS(3 * 60 * 1000), pdTRUE, remInstance, repeatPulse);

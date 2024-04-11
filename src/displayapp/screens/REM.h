@@ -20,6 +20,8 @@ namespace Pinetime {
                 void OnButtonEventSTOP(lv_event_t);
                 void startDelayToSequence();
 
+                void ScheduleAlarmWithDelay(uint32_t delayInMinutes);
+
 
 
             private:
@@ -28,8 +30,6 @@ namespace Pinetime {
                 static void repeatPulse(TimerHandle_t);
                 static void pulseThreeTimes(TimerHandle_t);
                 static void pulseAndStop(TimerHandle_t);
-
-                static void test(TimerHandle_t);
 
                 TimerHandle_t delayTimerHandle;
             };
