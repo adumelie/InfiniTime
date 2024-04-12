@@ -36,7 +36,7 @@ void MotorController::StopRinging() {
 }
 
 void MotorController::pulse() {
-    RunForDuration(pdMS_TO_TICKS(10));
+    RunForDuration(pdMS_TO_TICKS(5));
 }
 
 void MotorController::hapticFeedback() {
@@ -52,4 +52,58 @@ void MotorController::StopPulse(TimerHandle_t xTimer) {
 
 void MotorController::StopMotor(TimerHandle_t /*xTimer*/) {
   nrf_gpio_pin_set(PinMap::Motor);
+}
+
+void MotorController::periodicVibrationSequence(TimerHandle_t xTimer) {
+    // Called either after heuristic of 75 min or with REM detection
+    // Pulses in REM, while in REM start sequence every 3 minutes for 4 times ( 4 * pulsePeriod calls)
+    // Sequence repeated for 3*4 = 12 minutes of REM
+    // Sequence: 3 pulses in 3 seconds, 4 times seperated by 30 seconds
+    auto* motorController = static_cast<MotorController*>(pvTimerGetTimerID(xTimer));
+
+    auto repeatSequence = pdMS_TO_TICKS(3 * 60 * 1000);
+    TimerHandle_t repeatPulseTimer = xTimerCreate("vibrationPeriod", repeatSequence, pdTRUE, motorController, pulsePeriod);
+    xTimerStart(repeatPulseTimer, 0);
+}
+
+void MotorController::pulsePeriod(TimerHandle_t xTimer) {
+    static uint8_t count = 0;
+    auto* motorController = static_cast<MotorController*>(pvTimerGetTimerID(xTimer));
+    auto numberOfPulseCycles = 4;
+
+    count++;
+    if (count >= numberOfPulseCycles) {
+        xTimerStop(xTimer, 0);  // Stop vibrationPeriod timer after 4 cycles of 3 minutes
+        count = 0;
+
+        TimerHandle_t sequenceEvery30Seconds = xTimerCreate("sequenceEvery30Seconds", pdMS_TO_TICKS(30 * 1000), pdTRUE, motorController, majorPulsePeriod);
+        xTimerStart(sequenceEvery30Seconds, 0);
+    }
+}
+
+void MotorController::majorPulsePeriod(TimerHandle_t xTimer) {
+    static uint8_t count = 0;
+    auto* motorController = static_cast<MotorController*>(pvTimerGetTimerID(xTimer));
+
+    count++;
+    if (count >= 1) {
+        xTimerStop(xTimer, 0);  // Stop vibrationPeriod timer after
+        count = 0;
+
+        TimerHandle_t pulseAndStopTimer = xTimerCreate("minorPulsePeriod", pdMS_TO_TICKS(1500), pdTRUE, motorController, minorPulsePeriod);
+        xTimerStart(pulseAndStopTimer, 0);
+    }
+}
+
+void MotorController::minorPulsePeriod(TimerHandle_t xTimer) {
+    static uint8_t count = 0;
+    auto* motorController = static_cast<MotorController*>(pvTimerGetTimerID(xTimer));
+    motorController->pulse();
+
+    count++;
+    if (count >= 3) {
+        xTimerStop(xTimer, 0);  // Stop minor (3 pulses) pulse period
+        count = 0;
+    }
+
 }

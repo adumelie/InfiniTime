@@ -18,20 +18,11 @@ namespace Pinetime {
                 static void btnEventHandlerSTOP(lv_obj_t*, lv_event_t);
                 void OnButtonEvent(lv_event_t);
                 void OnButtonEventSTOP(lv_event_t);
-                void startDelayToSequence();
-
-                void ScheduleAlarmWithDelay(uint32_t delayInMinutes);
-
-
 
             private:
                 Pinetime::Controllers::MotorController& motorController;
-                static void periodicVibrationSequence(TimerHandle_t);
-                static void repeatPulse(TimerHandle_t);
-                static void pulseThreeTimes(TimerHandle_t);
-                static void pulseAndStop(TimerHandle_t);
 
-                TimerHandle_t delayTimerHandle;
+                TimerHandle_t REM_HeuristicTimer;
             };
         }
 

@@ -37,98 +37,31 @@ REM::REM(Controllers::MotorController& motorController):
 
 REM::~REM() {
     motorController.StopRinging(); // Make sure to stop any ongoing vibrations
-    xTimerDelete(delayTimerHandle, 0); // Make sure to stop timer
     lv_obj_clean(lv_scr_act());
 }
 
 void REM::OnButtonEvent(lv_event_t event) {
     if (event == LV_EVENT_CLICKED) {
-        startDelayToSequence();
+        motorController.hapticFeedback();
+        motorController.hapticFeedback();   // Two pulse haptic feedback
+
+        // Calculate delay in ticks manually, without using ms nor pdMS_To_Ticks to avoid integer overflow
+        auto REM_HeuristicDelay = 75 * configTICK_RATE_HZ * 60;
+
+        REM_HeuristicTimer = xTimerCreate("DelayTimer", REM_HeuristicDelay, pdTRUE, &motorController, Controllers::MotorController::periodicVibrationSequence);
+        xTimerStart(REM_HeuristicTimer, 0);
+
     }
 }
 
 void REM::OnButtonEventSTOP(lv_event_t event) {
     if (event == LV_EVENT_CLICKED) {
         motorController.StopRinging();
-        xTimerStop(delayTimerHandle, 0);
+        xTimerStop(REM_HeuristicTimer, 0);
     }
 }
 
 void REM::btnEventHandlerSTOP(lv_obj_t* obj, lv_event_t event) {
     auto* screen = static_cast<REM*>(obj->user_data);
     screen->OnButtonEventSTOP(event);
-}
-
-void REM::startDelayToSequence() {
-    motorController.hapticFeedback();
-    motorController.hapticFeedback();
-
-    // Timer REM heuristic (70 + 5 min SOP), repeat after 70 + 5 min also
-    // auto delay = pdMS_TO_TICKS(5 * 60 * 1000); // 5 min (uint32)
-
-    // calculate delay in ticks manually, without using ms not pdMS_To_Ticks to avoid overflow, 75 min
-    auto delay = 75 * configTICK_RATE_HZ * 60;
-
-    delayTimerHandle = xTimerCreate("DelayTimer", delay, pdTRUE, this, periodicVibrationSequence);
-    xTimerStart(delayTimerHandle, 0);
-}
-
-void REM::periodicVibrationSequence(TimerHandle_t xTimer) {
-    static uint8_t count = 0; // Breaking 75 min into chunks that fit into uint32_t, not neat but OK for personal build
-    REM *remInstance = static_cast<REM *>(pvTimerGetTimerID(xTimer));
-
-    count++;
-    if (count >= 1) {  // 15 * 5 min = 75 min, or 1 * 75 = 75
-        count = 0;     // Reset for another 75 min
-
-        TimerHandle_t repeatPulseTimer = xTimerCreate("repeatPulseTimer", pdMS_TO_TICKS(3 * 60 * 1000), pdTRUE, remInstance, repeatPulse);
-        xTimerStart(repeatPulseTimer, 0);
-    }
-}
-
-void REM::repeatPulse(TimerHandle_t xTimer) {
-    /*
-     * Repeat the pulse Y times
-     * The function is called every X seconds by the timer
-     * and will stop after Y times.
-     */
-    static uint8_t count = 0;
-    REM *remInstance = static_cast<REM *>(pvTimerGetTimerID(xTimer));
-
-    count++;
-    if (count >= 4) {
-        xTimerStop(xTimer, 0);
-        count = 0;
-
-        // Create a new timer that triggers every 30 seconds and calls pulseThreeTimes
-        TimerHandle_t pulseThreeTimesTimer = xTimerCreate("pulseThreeTimesTimer", pdMS_TO_TICKS(30 * 1000), pdTRUE, remInstance, pulseThreeTimes);
-        xTimerStart(pulseThreeTimesTimer, 0);
-    }
-}
-
-void REM::pulseThreeTimes(TimerHandle_t xTimer) {
-    static uint8_t count = 0;
-    REM *remInstance = static_cast<REM *>(pvTimerGetTimerID(xTimer));
-
-    count++;
-    if (count >= 1) {
-        xTimerStop(xTimer, 0);
-        count = 0;
-
-        // Create a new timer that triggers every 2 seconds and calls pulseAndStop
-        TimerHandle_t pulseAndStopTimer = xTimerCreate("pulseAndStopTimer", pdMS_TO_TICKS(1000), pdTRUE, remInstance, pulseAndStop);
-        xTimerStart(pulseAndStopTimer, 0);
-    }
-}
-
-void REM::pulseAndStop(TimerHandle_t xTimer) {
-    static uint8_t count = 0;
-    REM *remInstance = static_cast<REM *>(pvTimerGetTimerID(xTimer));
-    remInstance->motorController.pulse();
-
-    count++;
-    if (count >= 3) {
-        xTimerStop(xTimer, 0);
-        count = 0;
-    }
 }
