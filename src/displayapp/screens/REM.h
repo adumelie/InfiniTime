@@ -18,11 +18,16 @@ namespace Pinetime {
                 static void btnEventHandlerSTOP(lv_obj_t*, lv_event_t);
                 void OnButtonEvent(lv_event_t);
                 void OnButtonEventSTOP(lv_event_t);
+                void Refresh() override;
 
             private:
                 Pinetime::Controllers::MotorController& motorController;
 
-                TimerHandle_t REM_HeuristicTimer;
+                lv_obj_t* statusLabel;
+                lv_obj_t* timeLeftLabel;
+                lv_task_t* taskRefresh;
+
+                void UpdateStatusLabel();
             };
         }
 
