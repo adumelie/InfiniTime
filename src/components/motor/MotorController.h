@@ -7,11 +7,13 @@
 namespace Pinetime {
   namespace Controllers {
 
+/*
       enum class StimulationTaskState {
           waiting,
           running,
           stopped
       };
+*/
 
     class MotorController {
     public:
@@ -21,14 +23,13 @@ namespace Pinetime {
       void RunForDuration(uint8_t motorDuration);
       void StartRinging();
       void StopRinging();
-      void pulse();
-      void hapticFeedback();
 
+      void hapticFeedback();
       void StartStimulationTask();
       TickType_t GetRemainingREMHeuristicTime();
 
       static void periodicVibrationSequence(TimerHandle_t xTimer);
-      StimulationTaskState stimulationTaskState = StimulationTaskState::stopped;
+      //StimulationTaskState stimulationTaskState = StimulationTaskState::stopped;
 
     private:
       static void Ring(TimerHandle_t xTimer);
@@ -36,14 +37,15 @@ namespace Pinetime {
       static void StopPulse(TimerHandle_t xTimer);
       TimerHandle_t shortVib;
       TimerHandle_t longVib;
+
+      static void pulse(TimerHandle_t xTimer);
+      static void repeatSequence(TimerHandle_t xTimer);
+      static void majorPulsePeriod(TimerHandle_t xTimer);
       TimerHandle_t pulseTimerEnd;
       TimerHandle_t REM_HeuristicTimer;
       TimerHandle_t repeatSequenceTimer;
+      uint8_t pulseCount = 0;
 
-
-      static void repeatSequence(TimerHandle_t xTimer);
-      static void majorPulsePeriod(TimerHandle_t xTimer);
-      static void minorPulsePeriod(TimerHandle_t xTimer);
     };
   }
 }
