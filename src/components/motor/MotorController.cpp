@@ -72,7 +72,6 @@ void MotorController::StartStimulationTask() {
 }
 
 TickType_t MotorController::GetRemainingREMHeuristicTime() {
-/*
     if (stimulationTaskState == StimulationTaskState::stopped) {
         return 0;
     }
@@ -82,8 +81,6 @@ TickType_t MotorController::GetRemainingREMHeuristicTime() {
     else { // Running
         return xTimerGetExpiryTime(repeatSequenceTimer) - xTaskGetTickCount();
     }
-*/
-    return xTimerGetExpiryTime(repeatSequenceTimer) - xTaskGetTickCount();
 }
 
 

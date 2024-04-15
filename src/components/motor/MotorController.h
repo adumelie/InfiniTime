@@ -7,13 +7,11 @@
 namespace Pinetime {
   namespace Controllers {
 
-/*
       enum class StimulationTaskState {
           waiting,
           running,
           stopped
       };
-*/
 
     class MotorController {
     public:
@@ -29,7 +27,7 @@ namespace Pinetime {
       TickType_t GetRemainingREMHeuristicTime();
 
       static void periodicVibrationSequence(TimerHandle_t xTimer);
-      //StimulationTaskState stimulationTaskState = StimulationTaskState::stopped;
+      StimulationTaskState stimulationTaskState = StimulationTaskState::stopped;
 
     private:
       static void Ring(TimerHandle_t xTimer);

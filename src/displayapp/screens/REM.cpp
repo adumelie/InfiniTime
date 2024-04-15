@@ -17,7 +17,6 @@ REM::REM(Controllers::MotorController& motorController):
 
     timeLeftLabel = lv_label_create(lv_scr_act(), nullptr);
     lv_obj_align(timeLeftLabel, nullptr, LV_ALIGN_CENTER, 0, -100);
-    lv_label_set_text(timeLeftLabel, "N/A");
 
 
     lv_obj_t* startBtn = lv_label_create(btn, nullptr);
@@ -38,8 +37,8 @@ void REM::Refresh() {
     TickType_t remainingTimeInTicks = motorController.GetRemainingREMHeuristicTime();
     const uint16_t remainingTimeInSeconds = remainingTimeInTicks / (configTICK_RATE_HZ); // Truncation towards 0
 
-    uint8_t minutes  = remainingTimeInSeconds >> 6;
-    uint8_t seconds = remainingTimeInSeconds & 0b111111;
+    uint8_t minutes  = remainingTimeInSeconds / 60;
+    uint8_t seconds = remainingTimeInSeconds % 60;
 
     char timeLeftStr[6];
     snprintf(timeLeftStr, sizeof(timeLeftStr), "%02d:%02d", minutes, seconds);
