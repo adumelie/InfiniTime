@@ -11,6 +11,7 @@ export SOURCES_DIR="${SOURCES_DIR:=/sources}"
 export BUILD_DIR="${BUILD_DIR:=$SOURCES_DIR/build}"
 export OUTPUT_DIR="${OUTPUT_DIR:=$SOURCES_DIR/build/output}"
 
+
 # Specify a folder with read/write access to NPM
 export NPM_DIR="$BUILD_DIR/npm"
 export npm_config_cache="${NPM_DIR}"
@@ -68,7 +69,8 @@ CmakeGenerate() {
     -DARM_NONE_EABI_TOOLCHAIN_PATH="$TOOLS_DIR/$GCC_ARM_PATH" \
     -DNRF5_SDK_PATH="$TOOLS_DIR/$NRF_SDK_VER" \
     -DBUILD_DFU=1 \
-    -DBUILD_RESOURCES=1
+    -DBUILD_RESOURCES=1 \
+    -DENABLE_USERAPPS="Apps::REM"
 }
 
 CmakeBuild() {

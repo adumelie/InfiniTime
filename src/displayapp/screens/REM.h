@@ -14,8 +14,8 @@ namespace Pinetime {
                 REM(Controllers::MotorController& motorController);
                 ~REM() override;
 
-                static void btnEventHandler(lv_obj_t*, lv_event_t);
-                void OnButtonEvent(lv_event_t);
+                static void btnStartEventHandler(lv_obj_t*, lv_event_t);
+                static void btnStopEventHandler(lv_obj_t*, lv_event_t);
                 void Refresh() override;
 
             private:
@@ -23,6 +23,9 @@ namespace Pinetime {
 
                 lv_obj_t* timeLeftLabel;
                 lv_task_t* taskRefresh;
+                lv_obj_t* btnStart;
+                lv_obj_t* btnStop;
+
             };
         }
 

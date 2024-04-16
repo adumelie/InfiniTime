@@ -27,6 +27,7 @@ namespace Pinetime {
       TickType_t GetRemainingREMHeuristicTime();
 
       static void periodicVibrationSequence(TimerHandle_t xTimer);
+      void StopStimulationTask();
       StimulationTaskState stimulationTaskState = StimulationTaskState::stopped;
 
     private:
@@ -42,6 +43,7 @@ namespace Pinetime {
       TimerHandle_t pulseTimerEnd;
       TimerHandle_t REM_HeuristicTimer;
       TimerHandle_t repeatSequenceTimer;
+      TimerHandle_t sequenceEvery30Seconds;
       uint8_t pulseCount = 0;
 
     };
