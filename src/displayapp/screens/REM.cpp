@@ -37,7 +37,7 @@ REM::REM(Controllers::MotorController& motorController):
 
     btnStop = lv_btn_create(lv_scr_act(), nullptr);
     lv_obj_set_size(btnStop, 100, 50);
-    lv_obj_align(btnStop, nullptr, LV_ALIGN_CENTER, 0, 100);
+    lv_obj_align(btnStop, nullptr, LV_ALIGN_CENTER, 0, 80);
     lv_obj_t* btnStopText = lv_label_create(btnStop, nullptr);
     lv_label_set_text(btnStopText, "Stop");
     lv_obj_set_user_data(btnStop, this); // Set REM instance as user data

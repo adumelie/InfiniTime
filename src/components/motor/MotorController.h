@@ -33,14 +33,12 @@ namespace Pinetime {
     private:
       static void Ring(TimerHandle_t xTimer);
       static void StopMotor(TimerHandle_t xTimer);
-      static void StopPulse(TimerHandle_t xTimer);
       TimerHandle_t shortVib;
       TimerHandle_t longVib;
 
       static void pulse(TimerHandle_t xTimer);
       static void repeatSequence(TimerHandle_t xTimer);
       static void majorPulsePeriod(TimerHandle_t xTimer);
-      TimerHandle_t pulseTimerEnd;
       TimerHandle_t REM_HeuristicTimer;
       TimerHandle_t repeatSequenceTimer;
       TimerHandle_t sequenceEvery30Seconds;
