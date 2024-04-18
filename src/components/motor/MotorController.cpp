@@ -36,7 +36,7 @@ void MotorController::StopRinging() {
 
 void MotorController::pulse(TimerHandle_t xTimer) {
     MotorController* motorController = static_cast<MotorController*>(pvTimerGetTimerID(xTimer));
-    motorController->RunForDuration(pdMS_TO_TICKS(50));
+    motorController->RunForDuration(pdMS_TO_TICKS(motorController->PULSE_TIME));
 
     motorController->pulseCount++;
     if (motorController->pulseCount >= 3) {
@@ -68,10 +68,6 @@ void MotorController::StopStimulationTask() {
 
 void MotorController::StartStimulationTask() {
     StopStimulationTask();
-
-    // Calculate delay in ticks manually, without using ms nor pdMS_To_Ticks to avoid integer overflow
-    // TickType_t REM_HeuristicDelay = 75 * configTICK_RATE_HZ * 60;
-    TickType_t REM_HeuristicDelay = 13 * configTICK_RATE_HZ * 60;
 
     REM_HeuristicTimer = xTimerCreate("r", REM_HeuristicDelay, pdTRUE, this, periodicVibrationSequence);
     xTimerStart(REM_HeuristicTimer, 0);

@@ -43,6 +43,16 @@ namespace Pinetime {
       TimerHandle_t repeatSequenceTimer;
       uint8_t pulseCount = 0;
 
+
+
+      // TickType_t REM_HeuristicDelay = 75 * configTICK_RATE_HZ * 60;
+      // const PULSE_TIME = 5;
+
+      // DEBUG
+      TickType_t REM_HeuristicDelay = 13 * configTICK_RATE_HZ * 60;
+      const PULSE_TIME = 50;
+
+
     };
   }
 }
