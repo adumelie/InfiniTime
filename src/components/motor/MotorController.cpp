@@ -36,7 +36,7 @@ void MotorController::StopRinging() {
 
 void MotorController::pulse(TimerHandle_t xTimer) {
     MotorController* motorController = static_cast<MotorController*>(pvTimerGetTimerID(xTimer));
-    motorController->RunForDuration(pdMS_TO_TICKS(5));
+    motorController->RunForDuration(pdMS_TO_TICKS(50));
 
     motorController->pulseCount++;
     if (motorController->pulseCount >= 3) {
@@ -61,7 +61,7 @@ void MotorController::StopStimulationTask() {
 
         xTimerStop(REM_HeuristicTimer, 0);
         xTimerStop(repeatSequenceTimer, 0);
-        xTimerStop(sequenceEvery30Seconds, 0);
+        pulseCount = 3; // Max count to stop if currently pulsing
         stimulationTaskState = StimulationTaskState::stopped;
     }
 }
@@ -70,7 +70,8 @@ void MotorController::StartStimulationTask() {
     StopStimulationTask();
 
     // Calculate delay in ticks manually, without using ms nor pdMS_To_Ticks to avoid integer overflow
-    TickType_t REM_HeuristicDelay = 75 * configTICK_RATE_HZ * 60;
+    // TickType_t REM_HeuristicDelay = 75 * configTICK_RATE_HZ * 60;
+    TickType_t REM_HeuristicDelay = 13 * configTICK_RATE_HZ * 60;
 
     REM_HeuristicTimer = xTimerCreate("r", REM_HeuristicDelay, pdTRUE, this, periodicVibrationSequence);
     xTimerStart(REM_HeuristicTimer, 0);
@@ -92,13 +93,11 @@ TickType_t MotorController::GetRemainingREMHeuristicTime() {
 
 void MotorController::periodicVibrationSequence(TimerHandle_t xTimer) {
     // Called either after heuristic of 75 min or with REM detection
-    // Pulses in REM, while in REM start sequence every 3 minutes for 4 times ( 4 * pulsePeriod calls)
-    // Sequence repeated for 3*4 = 12 minutes of REM
-    // Sequence: 3 pulses in 3 seconds, 4 times seperated by 30 seconds
+    // Sequence repeated for 12 minutes of REM
     MotorController* motorController = static_cast<MotorController*>(pvTimerGetTimerID(xTimer));
     motorController->stimulationTaskState = StimulationTaskState::running;
 
-    TickType_t repeatSequenceDelay = pdMS_TO_TICKS(3 * 60 * 1000);
+    TickType_t repeatSequenceDelay = pdMS_TO_TICKS(30 * 1000);
     motorController->repeatSequenceTimer = xTimerCreate("vP", repeatSequenceDelay, pdTRUE, motorController, repeatSequence);
     xTimerStart(motorController->repeatSequenceTimer, 0);
 }
@@ -106,20 +105,17 @@ void MotorController::periodicVibrationSequence(TimerHandle_t xTimer) {
 void MotorController::repeatSequence(TimerHandle_t xTimer) {
     static uint8_t count = 0;
     MotorController* motorController = static_cast<MotorController*>(pvTimerGetTimerID(xTimer));
-    const int numberOfPulseCycles = 4;
 
-    count++;
-    if (count >= numberOfPulseCycles) {
-        xTimerStop(xTimer, 0);  // Stop vibrationPeriod timer after 4 cycles of 3 minutes
-        count = 0;
-
-        motorController->sequenceEvery30Seconds = xTimerCreate("rS", pdMS_TO_TICKS(30 * 1000), pdTRUE, motorController, majorPulsePeriod);
-        xTimerStart(motorController->sequenceEvery30Seconds, 0);
+    // Every 30 sec period this is called
+    if (count >= 21) { // 12 min in periods of 30 sec (Counts 21-24 are do nothing)
+        xTimerStop(xTimer, 0);
+    }
+    else if (count % 6 < 3) { // Pulse the first 3 cycles, do nothing the next three, repeat
+        motorController->majorPulsePeriod();
     }
 }
 
-void MotorController::majorPulsePeriod(TimerHandle_t xTimer) {
-    MotorController* motorController = static_cast<MotorController*>(pvTimerGetTimerID(xTimer));
-    TimerHandle_t pulseAndStopTimer = xTimerCreate("mP", pdMS_TO_TICKS(1500), pdTRUE, motorController, pulse);
+void MotorController::majorPulsePeriod() {
+    TimerHandle_t pulseAndStopTimer = xTimerCreate("mP", pdMS_TO_TICKS(1500), pdTRUE, this, pulse);
     xTimerStart(pulseAndStopTimer, 0);
 }

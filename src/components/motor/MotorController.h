@@ -38,10 +38,9 @@ namespace Pinetime {
 
       static void pulse(TimerHandle_t xTimer);
       static void repeatSequence(TimerHandle_t xTimer);
-      static void majorPulsePeriod(TimerHandle_t xTimer);
+      void majorPulsePeriod();
       TimerHandle_t REM_HeuristicTimer;
       TimerHandle_t repeatSequenceTimer;
-      TimerHandle_t sequenceEvery30Seconds;
       uint8_t pulseCount = 0;
 
     };
