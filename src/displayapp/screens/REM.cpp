@@ -70,6 +70,20 @@ void REM::Refresh() {
 
     lv_label_set_text(timeLeftLabel, timeLeftStr);
 
+    // If state is running, set color to green
+    if (motorController.stimulationTaskState == Controllers::StimulationTaskState::running) {
+        lv_obj_set_style_local_text_color(timeLeftLabel, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_GREEN);
+    }
+        // If state is waiting, set color to blue
+    else if (motorController.stimulationTaskState == Controllers::StimulationTaskState::waiting) {
+        lv_obj_set_style_local_text_color(timeLeftLabel, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLUE);
+    }
+        // If state is stopped, set color to red
+    else {
+        lv_obj_set_style_local_text_color(timeLeftLabel, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_RED);
+    }
+
+
     // If state is running or waiting grey out start button
     if (motorController.stimulationTaskState == Controllers::StimulationTaskState::running
         || motorController.stimulationTaskState == Controllers::StimulationTaskState::waiting) {
