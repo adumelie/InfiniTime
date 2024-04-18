@@ -34,6 +34,10 @@ void MotorController::StopRinging() {
   nrf_gpio_pin_set(PinMap::Motor);
 }
 
+void MotorController::StopMotor(TimerHandle_t /*xTimer*/) {
+    nrf_gpio_pin_set(PinMap::Motor);
+}
+
 void MotorController::pulse(TimerHandle_t xTimer) {
     MotorController* motorController = static_cast<MotorController*>(pvTimerGetTimerID(xTimer));
     motorController->RunForDuration(pdMS_TO_TICKS(motorController->PULSE_TIME));
@@ -51,10 +55,6 @@ void MotorController::hapticFeedback() {
     xTimerStop(longVib, 0); // Stop the vibration
 }
 
-void MotorController::StopMotor(TimerHandle_t /*xTimer*/) {
-  nrf_gpio_pin_set(PinMap::Motor);
-}
-
 void MotorController::StopStimulationTask() {
     if (stimulationTaskState == StimulationTaskState::running
         || stimulationTaskState == StimulationTaskState::waiting) {
@@ -64,14 +64,6 @@ void MotorController::StopStimulationTask() {
         pulseCount = 3; // Max count to stop if currently pulsing
         stimulationTaskState = StimulationTaskState::stopped;
     }
-}
-
-void MotorController::StartStimulationTask() {
-    StopStimulationTask();
-
-    REM_HeuristicTimer = xTimerCreate("r", REM_HeuristicDelay, pdTRUE, this, periodicVibrationSequence);
-    xTimerStart(REM_HeuristicTimer, 0);
-    stimulationTaskState = StimulationTaskState::waiting;
 }
 
 TickType_t MotorController::GetRemainingREMHeuristicTime() {
@@ -86,6 +78,14 @@ TickType_t MotorController::GetRemainingREMHeuristicTime() {
     }
 }
 
+
+void MotorController::StartStimulationTask() {
+    StopStimulationTask();
+
+    REM_HeuristicTimer = xTimerCreate("r", REM_HeuristicDelay, pdTRUE, this, periodicVibrationSequence);
+    xTimerStart(REM_HeuristicTimer, 0);
+    stimulationTaskState = StimulationTaskState::waiting;
+}
 
 void MotorController::periodicVibrationSequence(TimerHandle_t xTimer) {
     // Called either after heuristic of 75 min or with REM detection
@@ -106,6 +106,7 @@ void MotorController::repeatSequence(TimerHandle_t xTimer) {
     // Every 30 sec period this is called
     if (count >= 21) { // 12 min in periods of 30 sec (Counts 21-24 are do nothing)
         xTimerStop(xTimer, 0);
+        motorController->stimulationTaskState = StimulationTaskState::waiting;
     }
     else if (count % 6 < 3) { // Pulse the first 3 cycles, do nothing the next three, repeat
         motorController->majorPulsePeriod();

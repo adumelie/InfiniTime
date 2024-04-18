@@ -50,7 +50,7 @@ namespace Pinetime {
 
       // DEBUG
       TickType_t REM_HeuristicDelay = 13 * configTICK_RATE_HZ * 60;
-      const PULSE_TIME = 50;
+      const uint8_t PULSE_TIME = 50;
 
 
     };
