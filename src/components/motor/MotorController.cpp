@@ -104,8 +104,9 @@ void MotorController::periodicVibrationSequence(TimerHandle_t xTimer) {
 
 void MotorController::repeatSequence(TimerHandle_t xTimer) {
     static uint8_t count = 0;
-    MotorController* motorController = static_cast<MotorController*>(pvTimerGetTimerID(xTimer));
 
+    MotorController* motorController = static_cast<MotorController*>(pvTimerGetTimerID(xTimer));
+    count++;
     // Every 30 sec period this is called
     if (count >= 21) { // 12 min in periods of 30 sec (Counts 21-24 are do nothing)
         xTimerStop(xTimer, 0);
