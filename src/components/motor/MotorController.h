@@ -30,6 +30,11 @@ namespace Pinetime {
       void StopStimulationTask();
       StimulationTaskState stimulationTaskState = StimulationTaskState::stopped;
 
+      uint8_t getPulseStrength() { return PULSE_TIME; }
+      void setPulseStrength(const uint8_t pulseTime) { PULSE_TIME = pulseTime; }
+      uint8_t getMaxPeriodCountInREM() { return maxPeriodCountInREM; }
+      void setMaxPeriodCountInREM(const uint8_t maxPeriodCount) { maxPeriodCountInREM = maxPeriodCount; }
+
     private:
       static void Ring(TimerHandle_t xTimer);
       static void StopMotor(TimerHandle_t xTimer);
@@ -42,15 +47,12 @@ namespace Pinetime {
       TimerHandle_t REM_HeuristicTimer;
       TimerHandle_t repeatSequenceTimer;
       uint8_t pulseCount = 0;
+      uint8_t periodCountInREM = 0;
 
+      TickType_t REM_HeuristicDelay = 75 * configTICK_RATE_HZ * 60;
 
-
-      // TickType_t REM_HeuristicDelay = 75 * configTICK_RATE_HZ * 60;
-      // const PULSE_TIME = 5;
-
-      // DEBUG
-      TickType_t REM_HeuristicDelay = 13 * configTICK_RATE_HZ * 60;
-      const uint8_t PULSE_TIME = 50;
+      uint8_t PULSE_TIME = 5;    // Default values
+      uint8_t maxPeriodCountInREM = 21;
 
 
     };

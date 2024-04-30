@@ -47,9 +47,35 @@ REM::REM(Controllers::MotorController& motorController):
     timeLeftLabel = lv_label_create(lv_scr_act(), nullptr);
     lv_obj_align(timeLeftLabel, nullptr, LV_ALIGN_CENTER, 0, -100);
 
+    pulseStrengthLabel = lv_label_create(lv_scr_act(), nullptr);
+    lv_obj_align(pulseStrengthLabel, nullptr, LV_ALIGN_CENTER, 0, 30);
+    maxREMPeriodCountLabel = lv_label_create(lv_scr_act(), nullptr);
+    lv_obj_align(maxREMPeriodCountLabel, pulseStrengthLabel, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+
+    updateInfoLabels();
+
+    btnToggle = lv_btn_create(lv_scr_act(), nullptr);
+    lv_obj_set_size(btnToggle, 50, 50);
+    lv_obj_align(btnToggle, nullptr, LV_ALIGN_IN_TOP_LEFT, 10, 10);
+    btnToggleText = lv_label_create(btnToggle, nullptr);
+    lv_label_set_text(btnToggleText, "N"); // Night default value
+    lv_obj_set_user_data(btnToggle, this);
+    lv_obj_set_event_cb(btnToggle, btnToggleEventHandler);
+
     motorController.Init();
 
     taskRefresh = lv_task_create(RefreshTaskCallback, 100, LV_TASK_PRIO_MID, this);
+}
+
+void REM::updateInfoLabels() const {
+    char pulseStrength[8];
+    snprintf(pulseStrength, sizeof(pulseStrength), "%d", motorController.getPulseStrength());
+    lv_label_set_text(pulseStrengthLabel, pulseStrength);
+
+    char maxREMPeriodCount[8];
+    snprintf(maxREMPeriodCount, sizeof(maxREMPeriodCount), "%d", motorController.getMaxPeriodCountInREM());
+    lv_label_set_text(maxREMPeriodCountLabel, maxREMPeriodCount);
+
 }
 
 REM::~REM() {
@@ -83,7 +109,6 @@ void REM::Refresh() {
         lv_obj_set_style_local_text_color(timeLeftLabel, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_RED);
     }
 
-
     // If state is running or waiting grey out start button
     if (motorController.stimulationTaskState == Controllers::StimulationTaskState::running
         || motorController.stimulationTaskState == Controllers::StimulationTaskState::waiting) {
@@ -93,3 +118,23 @@ void REM::Refresh() {
     }
 }
 
+void REM::btnToggleEventHandler(lv_obj_t* obj, lv_event_t event) {
+    REM* screen = static_cast<REM*>(obj->user_data);
+    if (event == LV_EVENT_CLICKED) {
+        screen->motorController.hapticFeedback(); // One pulse haptic feedback
+
+
+        if (screen->isNight) { // Toggle to DAY
+            screen->motorController.setPulseStrength(screen->DAY_TIME_PULSE_STRENGTH);
+            screen->motorController.setMaxPeriodCountInREM(screen->DAY_TIME_MAX_PERIOD_COUNT_IN_REM);
+            lv_label_set_text(screen->btnToggleText, "D");
+            screen->isNight = false;
+        } else {    // Toggle to NIGHT
+            screen->motorController.setPulseStrength(screen->NIGHT_TIME_PULSE_TIME);
+            screen->motorController.setMaxPeriodCountInREM(screen->NIGHT_TIME_MAX_PERIOD_COUNT_IN_REM);
+            lv_label_set_text(screen->btnToggleText, "N");
+            screen->isNight = true;
+        }
+    }
+    screen->updateInfoLabels();
+}

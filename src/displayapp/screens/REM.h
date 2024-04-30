@@ -16,7 +16,14 @@ namespace Pinetime {
 
                 static void btnStartEventHandler(lv_obj_t*, lv_event_t);
                 static void btnStopEventHandler(lv_obj_t*, lv_event_t);
+                static void btnToggleEventHandler(lv_obj_t*, lv_event_t);
                 void Refresh() override;
+
+                bool isNight = true;
+                const uint8_t DAY_TIME_PULSE_STRENGTH = 50;
+                const uint8_t DAY_TIME_MAX_PERIOD_COUNT_IN_REM = 3;
+                const uint8_t NIGHT_TIME_PULSE_TIME = 5;
+                const uint8_t NIGHT_TIME_MAX_PERIOD_COUNT_IN_REM = 21;
 
             private:
                 Pinetime::Controllers::MotorController& motorController;
@@ -25,7 +32,12 @@ namespace Pinetime {
                 lv_task_t* taskRefresh;
                 lv_obj_t* btnStart;
                 lv_obj_t* btnStop;
+                lv_obj_t* pulseStrengthLabel;
+                lv_obj_t* maxREMPeriodCountLabel;
+                lv_obj_t* btnToggle;
+                lv_obj_t* btnToggleText;
 
+                void updateInfoLabels() const;
             };
         }
 
