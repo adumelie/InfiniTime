@@ -58,9 +58,10 @@ REM::REM(Controllers::MotorController& motorController):
     lv_obj_set_size(btnToggle, 50, 50);
     lv_obj_align(btnToggle, nullptr, LV_ALIGN_IN_TOP_LEFT, 10, 10);
     btnToggleText = lv_label_create(btnToggle, nullptr);
-    lv_label_set_text(btnToggleText, "N"); // Night default value
     lv_obj_set_user_data(btnToggle, this);
     lv_obj_set_event_cb(btnToggle, btnToggleEventHandler);
+
+    setNight(); // Set default to night
 
     motorController.Init();
 
@@ -124,17 +125,27 @@ void REM::btnToggleEventHandler(lv_obj_t* obj, lv_event_t event) {
         screen->motorController.hapticFeedback(); // One pulse haptic feedback
 
 
-        if (screen->isNight) { // Toggle to DAY
-            screen->motorController.setPulseStrength(screen->DAY_TIME_PULSE_STRENGTH);
-            screen->motorController.setMaxPeriodCountInREM(screen->DAY_TIME_MAX_PERIOD_COUNT_IN_REM);
-            lv_label_set_text(screen->btnToggleText, "D");
-            screen->isNight = false;
-        } else {    // Toggle to NIGHT
-            screen->motorController.setPulseStrength(screen->NIGHT_TIME_PULSE_TIME);
-            screen->motorController.setMaxPeriodCountInREM(screen->NIGHT_TIME_MAX_PERIOD_COUNT_IN_REM);
-            lv_label_set_text(screen->btnToggleText, "N");
-            screen->isNight = true;
+        if (screen->isNight) {
+            screen->setDay(); // Toggle to DAY
+        } else {
+            screen->setNight(); // Toggle to NIGHT
         }
     }
     screen->updateInfoLabels();
+}
+
+void REM::setNight() {
+    motorController.setPulseStrength(NIGHT_TIME_PULSE_TIME);
+    motorController.setMaxPeriodCountInREM(NIGHT_TIME_MAX_PERIOD_COUNT_IN_REM);
+    lv_label_set_text(btnToggleText, "N");
+    isNight = true;
+    updateInfoLabels();
+}
+
+void REM::setDay() {
+    motorController.setPulseStrength(DAY_TIME_PULSE_STRENGTH);
+    motorController.setMaxPeriodCountInREM(DAY_TIME_MAX_PERIOD_COUNT_IN_REM);
+    lv_label_set_text(btnToggleText, "D");
+    isNight = false;
+    updateInfoLabels();
 }
