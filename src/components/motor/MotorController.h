@@ -54,7 +54,7 @@ namespace Pinetime {
       uint8_t cycleCount = 0;
 
       TickType_t REM_HeuristicDelay = 0;
-      const uint8_t BASE_REM_HeuristicDelay = 75;
+      const uint8_t BASE_REM_HeuristicDelay = 70;
       const uint8_t SOP_HeuristicDelay = 15;
       const uint8_t RESOP_HeuristicDelay = 5;
 
