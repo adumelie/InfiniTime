@@ -101,6 +101,21 @@ void MotorController::periodicVibrationSequence(TimerHandle_t xTimer) {
     MotorController* motorController = static_cast<MotorController*>(pvTimerGetTimerID(xTimer));
     motorController->stimulationTaskState = StimulationTaskState::running;
 
+    // Update timer when next cycles without new call to start method
+    // (unattended cycle delay update)
+    if (xTimerIsTimerActive(xTimer)){
+        xTimerStop(xTimer, 0);
+        if (motorController->cycleCount == 0) {
+            motorController->REM_HeuristicDelay = (motorController->SOP_HeuristicDelay + motorController->BASE_REM_HeuristicDelay) * configTICK_RATE_HZ * 60;
+        }
+        else {
+            motorController->REM_HeuristicDelay = (motorController->RESOP_HeuristicDelay + motorController->BASE_REM_HeuristicDelay) * configTICK_RATE_HZ * 60;
+        }
+        xTimerChangePeriod(xTimer, motorController->REM_HeuristicDelay, 0);
+        xTimerStart(xTimer, 0);
+    }
+
+
     TickType_t repeatSequenceDelay = pdMS_TO_TICKS(30 * 1000);
     motorController->repeatSequenceTimer = xTimerCreate("vP", repeatSequenceDelay, pdTRUE, motorController, repeatSequence);
     xTimerStart(motorController->repeatSequenceTimer, 0);
@@ -109,6 +124,14 @@ void MotorController::periodicVibrationSequence(TimerHandle_t xTimer) {
 void MotorController::repeatSequence(TimerHandle_t xTimer) {
     MotorController* motorController = static_cast<MotorController*>(pvTimerGetTimerID(xTimer));
     motorController->periodCountInREM++;
+
+    if (motorController->cycleCount >= 3){
+        if (not motorController->isLongerREM()) {
+            motorController->maxPeriodCountInREM *= 2; // More REM in later cycles
+            motorController->longerREM = true;
+        }
+    }
+
     // Every 30 sec period this is called
     if (motorController->periodCountInREM >= motorController->maxPeriodCountInREM) { // 12 min in periods of 30 sec (Counts 21-24 are do nothing)
         xTimerStop(xTimer, 0);

@@ -35,7 +35,8 @@ namespace Pinetime {
       uint8_t getMaxPeriodCountInREM() const { return maxPeriodCountInREM; }
       void setMaxPeriodCountInREM(const uint8_t maxPeriodCount) { maxPeriodCountInREM = maxPeriodCount; }
       uint8_t getCycleCount() const { return cycleCount; }
-      void resetCycleCount() { cycleCount = 0; }
+      void resetCycleCount() { cycleCount = 0; longerREM = false;}
+      bool isLongerREM() const { return longerREM; }
 
 
     private:
@@ -52,6 +53,7 @@ namespace Pinetime {
       uint8_t pulseCount = 0;
       uint8_t periodCountInREM = 0;
       uint8_t cycleCount = 0;
+      bool longerREM = false;
 
       TickType_t REM_HeuristicDelay = 0;
       const uint8_t BASE_REM_HeuristicDelay = 70;

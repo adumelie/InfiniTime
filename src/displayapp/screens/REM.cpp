@@ -125,6 +125,8 @@ void REM::Refresh() {
     } else {
         lv_obj_set_style_local_bg_color(btnStart, LV_BTN_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_GREEN);
     }
+
+    updateInfoLabels();
 }
 
 void REM::btnToggleEventHandler(lv_obj_t* obj, lv_event_t event) {
