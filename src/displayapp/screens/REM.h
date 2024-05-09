@@ -40,6 +40,7 @@ namespace Pinetime {
                 lv_obj_t* maxREMPeriodCountLabel;
                 lv_obj_t* btnToggle;
                 lv_obj_t* btnToggleText;
+                lv_obj_t* cycleCountLabel;
 
                 void updateInfoLabels() const;
             };

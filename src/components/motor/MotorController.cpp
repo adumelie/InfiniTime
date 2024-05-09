@@ -82,6 +82,14 @@ TickType_t MotorController::GetRemainingREMHeuristicTime() {
 void MotorController::StartStimulationTask() {
     StopStimulationTask();
 
+    if (cycleCount == 0) {
+        REM_HeuristicDelay = (SOP_HeuristicDelay + BASE_REM_HeuristicDelay) * configTICK_RATE_HZ * 60;
+    }
+    else {
+        REM_HeuristicDelay = (RESOP_HeuristicDelay + BASE_REM_HeuristicDelay) * configTICK_RATE_HZ * 60;
+    }
+    cycleCount++;
+
     REM_HeuristicTimer = xTimerCreate("r", REM_HeuristicDelay, pdTRUE, this, periodicVibrationSequence);
     xTimerStart(REM_HeuristicTimer, 0);
     stimulationTaskState = StimulationTaskState::waiting;

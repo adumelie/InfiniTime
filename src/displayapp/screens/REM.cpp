@@ -10,6 +10,7 @@ void REM::btnStartEventHandler(lv_obj_t* obj, lv_event_t event) {
         screen->motorController.hapticFeedback();   // Two pulse haptic feedback
 
         screen->motorController.StartStimulationTask();
+        screen->updateInfoLabels();
     }
 }
 
@@ -52,6 +53,9 @@ REM::REM(Controllers::MotorController& motorController):
     maxREMPeriodCountLabel = lv_label_create(lv_scr_act(), nullptr);
     lv_obj_align(maxREMPeriodCountLabel, pulseStrengthLabel, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
 
+    cycleCountLabel = lv_label_create(lv_scr_act(), nullptr);
+    lv_obj_align(cycleCountLabel, nullptr, LV_ALIGN_CENTER, 0, 60);
+
     updateInfoLabels();
 
     btnToggle = lv_btn_create(lv_scr_act(), nullptr);
@@ -76,6 +80,10 @@ void REM::updateInfoLabels() const {
     char maxREMPeriodCount[8];
     snprintf(maxREMPeriodCount, sizeof(maxREMPeriodCount), "%d", motorController.getMaxPeriodCountInREM());
     lv_label_set_text(maxREMPeriodCountLabel, maxREMPeriodCount);
+
+    char cycleCount[8];
+    snprintf(cycleCount, sizeof(cycleCount), "%d", motorController.getCycleCount());
+    lv_label_set_text(cycleCountLabel, cycleCount);
 
 }
 
@@ -139,6 +147,7 @@ void REM::setNight() {
     motorController.setMaxPeriodCountInREM(NIGHT_TIME_MAX_PERIOD_COUNT_IN_REM);
     lv_label_set_text(btnToggleText, "N");
     isNight = true;
+    motorController.resetCycleCount();
     updateInfoLabels();
 }
 
@@ -147,5 +156,6 @@ void REM::setDay() {
     motorController.setMaxPeriodCountInREM(DAY_TIME_MAX_PERIOD_COUNT_IN_REM);
     lv_label_set_text(btnToggleText, "D");
     isNight = false;
+    motorController.resetCycleCount();
     updateInfoLabels();
 }
