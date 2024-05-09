@@ -89,6 +89,7 @@ void MotorController::StartStimulationTask() {
         REM_HeuristicDelay = (RESOP_HeuristicDelay + BASE_REM_HeuristicDelay) * configTICK_RATE_HZ * 60;
     }
     cycleCount++;
+    updateStimulationDuration();
 
     REM_HeuristicTimer = xTimerCreate("r", REM_HeuristicDelay, pdTRUE, this, periodicVibrationSequence);
     xTimerStart(REM_HeuristicTimer, 0);
@@ -125,12 +126,7 @@ void MotorController::repeatSequence(TimerHandle_t xTimer) {
     MotorController* motorController = static_cast<MotorController*>(pvTimerGetTimerID(xTimer));
     motorController->periodCountInREM++;
 
-    if (motorController->cycleCount >= 3){
-        if (not motorController->isLongerREM()) {
-            motorController->maxPeriodCountInREM *= 2; // More REM in later cycles
-            motorController->longerREM = true;
-        }
-    }
+    motorController->updateStimulationDuration();
 
     // Every 30 sec period this is called
     if (motorController->periodCountInREM >= motorController->maxPeriodCountInREM) { // 12 min in periods of 30 sec (Counts 21-24 are do nothing)
@@ -140,6 +136,15 @@ void MotorController::repeatSequence(TimerHandle_t xTimer) {
     }
     else if (motorController->periodCountInREM % 6 < 3) { // Pulse the first 3 cycles, do nothing the next three, repeat
         motorController->majorPulsePeriod();
+    }
+}
+
+void MotorController::updateStimulationDuration() {
+    if (cycleCount >= 3){
+        if (not isLongerREM()) {
+            maxPeriodCountInREM *= 2.5; // More REM in later cycles
+            longerREM = true;
+        }
     }
 }
 

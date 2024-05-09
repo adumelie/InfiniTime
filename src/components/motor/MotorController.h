@@ -61,9 +61,10 @@ namespace Pinetime {
       const uint8_t RESOP_HeuristicDelay = 5;
 
       uint8_t PULSE_TIME = 5;    // Default values
-      uint8_t maxPeriodCountInREM = 21;
+      uint8_t maxPeriodCountInREM = 24; // Set in REM.h (day/night switch)
 
 
+      void updateStimulationDuration();
     };
   }
 }
