@@ -106,7 +106,7 @@ void MotorController::periodicVibrationSequence(TimerHandle_t xTimer) {
     // (unattended cycle delay update)
     if (xTimerIsTimerActive(xTimer)){
         xTimerStop(xTimer, 0);
-        if (motorController->cycleCount == 0) {
+        if (motorController->cycleCount == 0) { // TODO: never used since set to 1 in StartStimulationTask
             motorController->REM_HeuristicDelay = (motorController->SOP_HeuristicDelay + motorController->BASE_REM_HeuristicDelay) * configTICK_RATE_HZ * 60;
         }
         else {
@@ -116,6 +116,7 @@ void MotorController::periodicVibrationSequence(TimerHandle_t xTimer) {
         xTimerStart(xTimer, 0);
     }
 
+    motorController->cycleCount++;  // When heuristic timer expires update cycle count
 
     TickType_t repeatSequenceDelay = pdMS_TO_TICKS(30 * 1000);
     motorController->repeatSequenceTimer = xTimerCreate("vP", repeatSequenceDelay, pdTRUE, motorController, repeatSequence);

@@ -54,7 +54,8 @@ REM::REM(Controllers::MotorController& motorController):
     lv_obj_align(maxREMPeriodCountLabel, pulseStrengthLabel, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
 
     cycleCountLabel = lv_label_create(lv_scr_act(), nullptr);
-    lv_obj_align(cycleCountLabel, nullptr, LV_ALIGN_CENTER, 0, 60);
+    // align to the left of stop button
+    lv_obj_align(cycleCountLabel, btnStop, LV_ALIGN_OUT_LEFT_MID, -10, 0);
 
     updateInfoLabels();
 

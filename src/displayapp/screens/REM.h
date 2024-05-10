@@ -25,7 +25,7 @@ namespace Pinetime {
                 void setDay();
 
                 const uint8_t DAY_TIME_PULSE_STRENGTH = 50;
-                const uint8_t DAY_TIME_MAX_PERIOD_COUNT_IN_REM = 3;
+                const uint8_t DAY_TIME_MAX_PERIOD_COUNT_IN_REM = 4;
                 const uint8_t NIGHT_TIME_PULSE_TIME = 5;
                 const uint8_t NIGHT_TIME_MAX_PERIOD_COUNT_IN_REM = 24;
 
